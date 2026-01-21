@@ -176,6 +176,7 @@ def upload_file():
     if not allowed_file(file.filename):
         return jsonify({'error': 'Invalid file type. Please upload JPEG, JPG, PNG, or PDF files.'}), 400
     
+    filepath = None
     try:
         # Secure the filename
         filename = secure_filename(file.filename)
@@ -212,7 +213,7 @@ def upload_file():
         logger.error(f"Error processing file: {str(e)}")
         
         # Clean up file if it exists
-        if os.path.exists(filepath):
+        if filepath and os.path.exists(filepath):
             os.remove(filepath)
         
         return jsonify({

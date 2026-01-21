@@ -117,20 +117,49 @@ function displayResults(data) {
 
 // Copy to Clipboard
 function copyToClipboard() {
-    extractedText.select();
-    document.execCommand('copy');
+    const text = extractedText.value;
     
-    // Update button text temporarily
-    const originalText = copyBtn.innerHTML;
-    copyBtn.innerHTML = '<span class="btn-icon">✓</span> Copied!';
-    copyBtn.style.background = 'var(--success-color)';
-    
-    setTimeout(() => {
-        copyBtn.innerHTML = originalText;
-        copyBtn.style.background = '';
-    }, 2000);
-    
-    showNotification('Text copied to clipboard!', 'success');
+    // Use modern Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+            .then(() => {
+                // Update button text temporarily
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<span class="btn-icon">✓</span> Copied!';
+                copyBtn.style.background = 'var(--success-color)';
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.style.background = '';
+                }, 2000);
+                
+                showNotification('Text copied to clipboard!', 'success');
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+                showNotification('Failed to copy text', 'error');
+            });
+    } else {
+        // Fallback for older browsers
+        extractedText.select();
+        try {
+            document.execCommand('copy');
+            
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span class="btn-icon">✓</span> Copied!';
+            copyBtn.style.background = 'var(--success-color)';
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+                copyBtn.style.background = '';
+            }, 2000);
+            
+            showNotification('Text copied to clipboard!', 'success');
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            showNotification('Failed to copy text', 'error');
+        }
+    }
 }
 
 // Download as TXT File
